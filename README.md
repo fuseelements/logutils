@@ -51,21 +51,20 @@ Result:
 ```go
 package main
 
-import(
-  "log"
+import (
   "github.com/appio/logutils"
+  "log"
 )
 
-func main(){
-  filter := &LevelFilter{
-    Levels:   []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRIT"},
-    MinLevel: "WARN",
-    Writer:   os.Stdout,
-    Color:    true,
-  }
+func main() {
+  filter := logutils.NewFilter(nil, true)
 
   logger := log.New(filter, "", 0)
 
-  logger.Printf("[DEBUG] Started logging service")
+  logger.Printf("[DEBUG] This is a debug message")
+  logger.Printf("[INFO] This is an info message")
+  logger.Printf("[WARN] This is a warning")
+  logger.Printf("[ERROR] This is an error message")
+  logger.Printf("[CRIT] Sh!t just got real")
 }
 ```
