@@ -69,4 +69,3 @@ func main(){
   logger.Printf("[DEBUG] Started logging service")
 }
 ```
-

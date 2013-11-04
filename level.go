@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"sync"
 )
 
@@ -48,6 +49,23 @@ const (
 	colorWhite
 )
 
+// Constructs a new LevelFilter
+func NewFilter(outputDevice io.Writer, color bool) (filter *LevelFilter) {
+	filter = &LevelFilter{}
+	if outputDevice == nil {
+		filter.Writer = os.Stdout
+	} else {
+		filter.Writer = outputDevice
+	}
+
+	filter.Levels = []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRIT"}
+	filter.MinLevel = filter.Levels[0]
+
+	filter.Color = color
+
+	return
+}
+
 // Check will check a given line if it would be included in the level
 // filter.
 func (f *LevelFilter) Check(line []byte) bool {
@@ -82,8 +100,6 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 		} else {
 			buf.Write(p)
 		}
-
-		fmt.Println(buf.String())
 
 		return f.Writer.Write(buf.Bytes())
 	}
