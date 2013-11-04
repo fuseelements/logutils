@@ -19,3 +19,54 @@ Result:
 ```bash
 \x1b[33m[WARN] This is going to be red\n\x1b[0m
 ```
+
+## Filtering
+
+Log messages are automatically filtered based on the log message filter tags you use. Example:
+
+```go
+filter := &LevelFilter{
+  Levels:   []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRIT"},
+  MinLevel: "WARN",
+  Writer:   os.Stdout,
+  Color:    false,
+}
+
+logger := log.New(filter, "", 0)
+
+logger.Print("[DEBUG] This will be filtered out")
+logger.Print("[ERROR] This is an error")
+```
+
+Result:
+
+```
+[ERROR] This is an error
+```
+
+# Getting started
+
+`logutils` works by replacing the output device used by the standard logging package.
+
+```go
+package main
+
+import(
+  "log"
+  "github.com/appio/logutils"
+)
+
+func main(){
+  filter := &LevelFilter{
+    Levels:   []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRIT"},
+    MinLevel: "WARN",
+    Writer:   os.Stdout,
+    Color:    true,
+  }
+
+  logger := log.New(filter, "", 0)
+
+  logger.Printf("[DEBUG] Started logging service")
+}
+```
+
