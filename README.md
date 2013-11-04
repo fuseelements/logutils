@@ -17,5 +17,5 @@ log.Print("[WARN] This is going to be red")
 Result:
 
 ```bash
-\x1b[33m[WARN] foo\n\x1b[0m
+\x1b[33m[WARN] This is going to be red\n\x1b[0m
 ```
