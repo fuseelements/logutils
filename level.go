@@ -96,6 +96,7 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 		return len(p), nil
 	}
 
+	// Handle Alignment
 	if f.AlignLevels == true {
 		var level LogLevel = getLevel(p)
 		requiredPadding := f.longestLevel - (len(level))
@@ -113,6 +114,7 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 		}
 	}
 
+	// Handle Color
 	if f.Color == true {
 		var level LogLevel = getLevel(p)
 		buf := &bytes.Buffer{}

@@ -25,9 +25,40 @@ func BenchmarkDiscard(b *testing.B) {
 
 func BenchmarkLevelFilter(b *testing.B) {
 	filter := &LevelFilter{
-		Levels:   []LogLevel{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel: "WARN",
-		Writer:   ioutil.Discard,
+		Levels:      []LogLevel{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel:    "WARN",
+		Writer:      ioutil.Discard,
+		Color:       false,
+		AlignLevels: false,
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		filter.Write(messages[i%len(messages)])
+	}
+}
+
+func BenchmarkLevelAlignment(b *testing.B) {
+	filter := &LevelFilter{
+		Levels:      []LogLevel{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel:    "WARN",
+		Writer:      ioutil.Discard,
+		AlignLevels: true,
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		filter.Write(messages[i%len(messages)])
+	}
+}
+
+func BenchmarkColorize(b *testing.B) {
+	filter := &LevelFilter{
+		Levels:      []LogLevel{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel:    "WARN",
+		Writer:      ioutil.Discard,
+		AlignLevels: false,
+		Color:       true,
 	}
 
 	b.ResetTimer()
