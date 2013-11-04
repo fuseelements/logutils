@@ -4,7 +4,7 @@ logutils is a Go package that augments the standard library "log" package
 to make logging a bit more modern, without fragmenting the Go ecosystem
 with new logging packages.
 
-## Automatic Colorisation
+## Colorization
 
 If you use standard filter arguments in your log messages `logutils` will automatically colorise the output.
 
@@ -44,6 +44,26 @@ Result:
 [ERROR] This is an error
 ```
 
+## Alignment
+
+Messages will automatically be aligned to match the longest level code.
+
+```
+logger.Print("[WARN] foo")
+logger.Print("[DEBUG] bar")
+logger.Print("[ERROR] baz")
+logger.Print("[INFO] baz")
+```
+
+Result:
+
+```
+[WARN]  foo
+[DEBUG] bar
+[ERROR] baz
+[INFO]  baz
+```
+
 # Getting started
 
 `logutils` works by replacing the output device used by the standard `log` package.
@@ -68,3 +88,5 @@ func main() {
   logger.Printf("[CRIT] Sh!t just got real")
 }
 ```
+
+Also check out the [examples directory](/examples).
