@@ -2,6 +2,7 @@ package logutils
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 )
@@ -27,7 +28,25 @@ type LevelFilter struct {
 
 	badLevels map[LogLevel]struct{}
 	once      sync.Once
+
+	// Enable coloured output based on level
+	Color bool
 }
+
+var colors map[LogLevel]string
+
+type color int
+
+const (
+	colorBlack = (iota + 30)
+	colorRed
+	colorGreen
+	colorYellow
+	colorBlue
+	colorMagenta
+	colorCyan
+	colorWhite
+)
 
 // Check will check a given line if it would be included in the level
 // filter.
@@ -35,14 +54,7 @@ func (f *LevelFilter) Check(line []byte) bool {
 	f.once.Do(f.init)
 
 	// Check for a log level
-	var level LogLevel
-	x := bytes.IndexByte(line, '[')
-	if x >= 0 {
-		y := bytes.IndexByte(line[x:], ']')
-		if y >= 0 {
-			level = LogLevel(line[x+1 : x+y])
-		}
-	}
+	var level LogLevel = getLevel(line)
 
 	_, ok := f.badLevels[level]
 	return !ok
@@ -59,6 +71,23 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 		return len(p), nil
 	}
 
+	if f.Color == true {
+		var level LogLevel = getLevel(p)
+		buf := &bytes.Buffer{}
+
+		if colorStart, ok := colors[level]; ok {
+			buf.Write([]byte(colorStart))
+			buf.Write(p)
+			buf.Write([]byte(closeColorSeq()))
+		} else {
+			buf.Write(p)
+		}
+
+		fmt.Println(buf.String())
+
+		return f.Writer.Write(buf.Bytes())
+	}
+
 	return f.Writer.Write(p)
 }
 
@@ -71,4 +100,35 @@ func (f *LevelFilter) init() {
 
 		f.badLevels[level] = struct{}{}
 	}
+}
+
+func colorSeq(color color) string {
+	return fmt.Sprintf("\033[%dm", int(color))
+}
+
+func closeColorSeq() string {
+	return "\033[0m"
+}
+
+func init() {
+	colors = map[LogLevel]string{
+		"CRITICAL": colorSeq(colorMagenta),
+		"CRIT":     colorSeq(colorMagenta),
+		"ERROR":    colorSeq(colorRed),
+		"WARNING":  colorSeq(colorYellow),
+		"WARN":     colorSeq(colorYellow),
+		"NOTICE":   colorSeq(colorGreen),
+		"DEBUG":    colorSeq(colorCyan),
+	}
+}
+
+func getLevel(line []byte) (level LogLevel) {
+	x := bytes.IndexByte(line, '[')
+	if x >= 0 {
+		y := bytes.IndexByte(line[x:], ']')
+		if y >= 0 {
+			level = LogLevel(line[x+1 : x+y])
+		}
+	}
+	return
 }

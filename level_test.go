@@ -56,3 +56,38 @@ func TestLevelFilterCheck(t *testing.T) {
 		}
 	}
 }
+
+func TestColorFormatting(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	filter := &LevelFilter{
+		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
+		MinLevel: "DEBUG",
+		Writer:   buf,
+		Color:    true,
+	}
+
+	testCases := []struct {
+		line     string
+		expected string
+	}{
+		{"[WARN] foo\n", "\x1b[33m[WARN] foo\n\x1b[0m"},
+		{"[ERROR] bar\n", "\x1b[31m[ERROR] bar\n\x1b[0m"},
+		{"[DEBUG] baz\n", "\x1b[36m[DEBUG] baz\n\x1b[0m"},
+		{"[WARN] buzz\n", "\x1b[33m[WARN] buzz\n\x1b[0m"},
+	}
+
+	logger := log.New(filter, "", 0)
+
+	for _, testCase := range testCases {
+		logger.Print(testCase.line)
+
+		result := buf.String()
+		// expected := "[WARN] foo\n[ERROR] bar\n[WARN] buzz\n"
+		if result != testCase.expected {
+			t.Errorf("bad: %#v", result)
+		}
+
+		buf.Reset()
+	}
+}
