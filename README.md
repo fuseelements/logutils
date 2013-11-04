@@ -46,7 +46,7 @@ Result:
 
 # Getting started
 
-`logutils` works by replacing the output device used by the standard logging package.
+`logutils` works by replacing the output device used by the standard `log` package.
 
 ```go
 package main
