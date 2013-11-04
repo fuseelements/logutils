@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -32,6 +33,10 @@ type LevelFilter struct {
 
 	// Enable coloured output based on level
 	Color bool
+
+	// Slightly pads levels so that each message is printed aligned with the last
+	AlignLevels  bool
+	longestLevel int
 }
 
 var colors map[LogLevel]string
@@ -63,6 +68,8 @@ func NewFilter(outputDevice io.Writer, color bool) (filter *LevelFilter) {
 
 	filter.Color = color
 
+	filter.AlignLevels = true
+
 	return
 }
 
@@ -87,6 +94,23 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 
 	if !f.Check(p) {
 		return len(p), nil
+	}
+
+	if f.AlignLevels == true {
+		var level LogLevel = getLevel(p)
+		requiredPadding := f.longestLevel - (len(level))
+
+		x := bytes.IndexByte(p, '[')
+		if x >= 0 {
+			y := bytes.IndexByte(p[x:], ']')
+			if y >= 0 {
+				buf := &bytes.Buffer{}
+				buf.Write(p[:y+1])
+				buf.WriteString(strings.Repeat(" ", requiredPadding))
+				buf.Write(p[y+1:])
+				p = buf.Bytes()
+			}
+		}
 	}
 
 	if f.Color == true {
@@ -116,6 +140,10 @@ func (f *LevelFilter) init() {
 
 		f.badLevels[level] = struct{}{}
 	}
+
+	if f.AlignLevels {
+		f.longestLevel = levelPadding(f.Levels)
+	}
 }
 
 func colorSeq(color color) string {
@@ -136,6 +164,16 @@ func init() {
 		"NOTICE":   colorSeq(colorGreen),
 		"DEBUG":    colorSeq(colorCyan),
 	}
+}
+
+func levelPadding(levels []LogLevel) int {
+	var longest int = 0
+	for _, level := range levels {
+		if n := len(level); n > longest {
+			longest = n
+		}
+	}
+	return longest
 }
 
 func getLevel(line []byte) (level LogLevel) {
