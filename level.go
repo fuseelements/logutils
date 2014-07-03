@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+// LogLevel is the filterable level name.
 type LogLevel string
 
 // LevelFilter is an io.Writer that can be used with a logger that
@@ -54,7 +55,7 @@ const (
 	colorWhite
 )
 
-// Constructs a new LevelFilter
+// NewFilter constructs a new LevelFilter.
 func NewFilter(outputDevice io.Writer, color bool) (filter *LevelFilter) {
 	filter = &LevelFilter{}
 	if outputDevice == nil {
@@ -79,7 +80,7 @@ func (f *LevelFilter) Check(line []byte) bool {
 	f.once.Do(f.init)
 
 	// Check for a log level
-	var level LogLevel = getLevel(line)
+	var level = getLevel(line)
 
 	_, ok := f.badLevels[level]
 	return !ok
@@ -98,7 +99,7 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 
 	// Handle Alignment
 	if f.AlignLevels == true {
-		var level LogLevel = getLevel(p)
+		var level = getLevel(p)
 		requiredPadding := f.longestLevel - (len(level))
 
 		x := bytes.IndexByte(p, '[')
@@ -116,7 +117,7 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 
 	// Handle Color
 	if f.Color == true {
-		var level LogLevel = getLevel(p)
+		var level = getLevel(p)
 		buf := &bytes.Buffer{}
 
 		if colorStart, ok := colors[level]; ok {
@@ -175,7 +176,7 @@ func init() {
 }
 
 func levelPadding(levels []LogLevel) int {
-	var longest int = 0
+	var longest int
 	for _, level := range levels {
 		if n := len(level); n > longest {
 			longest = n
