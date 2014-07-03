@@ -72,7 +72,7 @@ Result:
 package main
 
 import (
-  "github.com/appio/logutils"
+  "gopkg.in/fuseelements/logutils.v1"
   "log"
 )
 
